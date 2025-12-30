@@ -20,3 +20,9 @@ jobs:
     - name: Assemble Release Build
       run: ./gradlew assembleRelease
       
+    - name: Upload Release APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Android-Release-APK
+        # 核心！指定要上传的编译产物路径，就是上面的固定gradle输出路径
+        path: app/build/outputs/apk/release/

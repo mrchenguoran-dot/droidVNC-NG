@@ -329,7 +329,29 @@ public class MainService extends Service {
     }
 
 
-
+/**
+ * 检查 PROJECT_MEDIA appops 是否被允许（Android 10 及以下）
+ */
+private boolean isProjectMediaAppOpAllowed(Context context) {
+    if (Build.VERSION.SDK_INT >= 30) {
+        return false; // 仅在 Android 10 及以下使用
+    }
+    
+    try {
+        AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOpsManager.checkOpNoThrow(
+            "android:project_media",
+            android.os.Process.myUid(),
+            context.getPackageName()
+        );
+        Log.i(TAG, "PROJECT_MEDIA app op mode: " + mode);
+        return mode == AppOpsManager.MODE_ALLOWED;
+    } catch (Exception e) {
+        Log.e(TAG, "Error checking app ops: " + e);
+        return false;
+    }
+}
+    
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
@@ -374,7 +396,7 @@ public class MainService extends Service {
         if(ACTION_HANDLE_MEDIA_PROJECTION_RESULT.equals(intent.getAction()) && MainServicePersistData.loadStartIntent(this) != null) {
             Log.d(TAG, "onStartCommand: handle media projection result");
             // Step 5 (optional, possibly repeating in one lifecycle): coming here when MediaProjection is started or stopped
-            if (!intent.getBooleanExtra(EXTRA_MEDIA_PROJECTION_STATE, false)) {
+            f (mResultCode != 0 && mResultData != null || (Build.VERSION.SDK_INT >= 30 && startIntent.getBooleanExtra(EXTRA_FALLBACK_SCREEN_CAPTURE, false)) || (Build.VERSION.SDK_INT < 30 && isProjectMediaAppOpAllowed(this))) {
                 // MediaProjection off.
                 // Coming here when a previously running MediaProjection was stopped by the user or system,
                 // in this case we need to unset the original request's result code and result data
